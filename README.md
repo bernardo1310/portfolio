@@ -26,13 +26,6 @@ Site pessoal estático com meus projetos, formação e experiência em tecnologi
 - **Acessibilidade:** link "pular para o conteúdo", foco visível e `prefers-reduced-motion` respeitado, então quem desativa animações no sistema vê tudo estático.
 - **Sem dependências externas:** nenhuma fonte, biblioteca ou rastreador de terceiros.
 
-## Rodar localmente
-
-```bash
-python3 -m http.server 8000
-# abra http://localhost:8000
-```
-
 ## Contato
 
 - E-mail: coelhobernardo199@gmail.com
