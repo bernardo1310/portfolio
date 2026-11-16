@@ -59,3 +59,72 @@ nav .nav-contact:hover{background:var(--ink);color:var(--paper);text-decoration:
 .socials a:hover{color:var(--accent);transform:translateY(-2px);text-decoration:none}
 @supports((-webkit-background-clip:text) or (background-clip:text)){.contact h2 em{background:linear-gradient(100deg,var(--accent) 25%,#fff 45%,var(--accent) 65%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 7s linear infinite}@keyframes shine{to{background-position:-250% 0}}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}html.fx body::before{display:none}.button:hover,.project:hover h3,.competencies article:hover{transform:none}}
+/* ===== Fase 2: flashcards, blueprint e efeitos de construção ===== */
+/* Flashcards 3D */
+.competencies .flip{perspective:1000px;height:215px;border:0;padding:0;cursor:pointer;border-radius:6px}
+.competencies .flip:hover{transform:none}
+.flip:focus-visible{outline:3px solid #58784a;outline-offset:6px}
+.flip-in{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .9s var(--ease)}
+.flip.flipped .flip-in,.flip:focus-visible .flip-in{transform:rotateY(180deg)}
+@media(hover:hover){.flip:hover .flip-in{transform:rotateY(180deg)}}
+.face{position:absolute;inset:0;-webkit-backface-visibility:hidden;backface-visibility:hidden;border:1px solid var(--line);border-radius:6px;padding:26px;display:flex;flex-direction:column}
+.face.front{background:#ffffff80}
+.face.back{transform:rotateY(180deg);background:var(--ink);color:var(--paper);border-color:var(--ink);justify-content:center}
+.flip .num{font:11px 'Courier New',monospace;color:#58784a}
+.flip h3{font-size:21px;margin:18px 0 10px;letter-spacing:-.4px}
+.flip .hint{margin:auto 0 0;font:10px 'Courier New',monospace;letter-spacing:1.6px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0;padding:0}
+.chips li{font-size:12px;line-height:1;padding:8px 11px;border:1px solid rgba(250,250,248,.35);border-radius:99px;opacity:0;transform:translateY(10px);transition:opacity .5s var(--ease),transform .5s var(--ease),background-color .25s,color .25s}
+.flip.flipped .chips li,.flip:focus-visible .chips li{opacity:1;transform:none;transition-delay:calc(.35s + var(--i)*.045s)}
+@media(hover:hover){.flip:hover .chips li{opacity:1;transform:none;transition-delay:calc(.35s + var(--i)*.045s)}}
+.chips li:hover{background:var(--accent);color:var(--ink)}
+/* Grade de projeto (blueprint) desenhando no hero */
+.hero{position:relative}
+.hero::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background-image:linear-gradient(rgba(32,41,35,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(32,41,35,.09) 1px,transparent 1px);background-size:56px 56px;-webkit-mask-image:radial-gradient(ellipse 70% 80% at 72% 45%,#000 0,transparent 75%);mask-image:radial-gradient(ellipse 70% 80% at 72% 45%,#000 0,transparent 75%);opacity:.7;animation:draw 2.2s var(--ease) .2s both}
+@keyframes draw{from{clip-path:inset(0 100% 0 0);opacity:0}}
+/* Linha que se desenha nos títulos de seção */
+.section-head .eyebrow::after{content:"";display:inline-block;width:0;height:1px;background:currentColor;vertical-align:middle;margin-left:14px;transition:width 1.1s var(--ease) .35s}
+.section-head.in .eyebrow::after,.section-head:not(.rv) .eyebrow::after{width:64px}
+/* Cantos de mira e foco de luz nos projetos */
+.project::after{content:"";position:absolute;inset:14px 0;pointer-events:none;opacity:0;transition:opacity .35s,inset .5s var(--ease);background:
+linear-gradient(var(--ink),var(--ink)) 0 0/14px 1px no-repeat,linear-gradient(var(--ink),var(--ink)) 0 0/1px 14px no-repeat,
+linear-gradient(var(--ink),var(--ink)) 100% 0/14px 1px no-repeat,linear-gradient(var(--ink),var(--ink)) 100% 0/1px 14px no-repeat,
+linear-gradient(var(--ink),var(--ink)) 0 100%/14px 1px no-repeat,linear-gradient(var(--ink),var(--ink)) 0 100%/1px 14px no-repeat,
+linear-gradient(var(--ink),var(--ink)) 100% 100%/14px 1px no-repeat,linear-gradient(var(--ink),var(--ink)) 100% 100%/1px 14px no-repeat}
+.project:hover::after,.project:focus-within::after{opacity:.55;inset:8px -10px}
+.project:hover{background:radial-gradient(260px circle at var(--cx,50%) var(--cy,50%),rgba(201,220,185,.4),transparent 70%)}
+/* Retrato com moldura de construção */
+.portrait{margin:46px 0 0;max-width:340px;transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .3s ease-out}
+.portrait .frame{position:relative}
+.portrait img{display:block;width:100%;height:auto;border-radius:2px;filter:grayscale(.2) contrast(1.03);transition:filter .6s,clip-path 1.3s var(--ease)}
+.portrait:hover img{filter:none}
+.portrait.bld:not(.in) img{clip-path:inset(0 0 100% 0)}
+.portrait .c{position:absolute;width:22px;height:22px;border:0 solid var(--ink);pointer-events:none;transition:transform .9s var(--ease) .6s,opacity .5s .6s}
+.portrait .tl{top:-10px;left:-10px;border-width:1.5px 0 0 1.5px}.portrait .tr{top:-10px;right:-10px;border-width:1.5px 1.5px 0 0}
+.portrait .bl{bottom:-10px;left:-10px;border-width:0 0 1.5px 1.5px}.portrait .br{bottom:-10px;right:-10px;border-width:0 1.5px 1.5px 0}
+.portrait.bld:not(.in) .c{opacity:0}
+.portrait.bld:not(.in) .tl{transform:translate(18px,18px)}.portrait.bld:not(.in) .tr{transform:translate(-18px,18px)}
+.portrait.bld:not(.in) .bl{transform:translate(18px,-18px)}.portrait.bld:not(.in) .br{transform:translate(-18px,-18px)}
+.portrait .scan{position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,transparent,#58784a,transparent);box-shadow:0 0 14px 2px rgba(88,120,74,.45);opacity:0;pointer-events:none}
+.portrait.in .scan{animation:scan 2.4s ease-in-out .5s both}
+@keyframes scan{0%{top:0;opacity:0}12%{opacity:1}88%{opacity:1}100%{top:100%;opacity:0}}
+.portrait figcaption{margin-top:30px;font:10px/1.8 'Courier New',monospace;letter-spacing:1.6px;color:var(--muted)}
+.portrait figcaption span{margin:0 10px}
+/* Contadores */
+.stats{list-style:none;display:flex;gap:38px;flex-wrap:wrap;margin:30px 0 0;padding:26px 0 0;border-top:1px solid #c8d1bd}
+.stats b{display:block;font-size:46px;font-weight:600;letter-spacing:-2.5px;line-height:1;font-variant-numeric:tabular-nums}
+.stats span{display:block;margin-top:10px;font:10px/1.5 'Courier New',monospace;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted)}
+/* Letreiro das tecnologias */
+html.mq .skills-strip{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+html.mq .skills-strip .wrap{width:max-content;max-width:none;margin:0;flex-wrap:nowrap;justify-content:flex-start;gap:0;padding:0;animation:mq 34s linear infinite}
+html.mq .skills-strip .wrap:hover{animation-play-state:paused}
+html.mq .skills-strip span{padding:25px 30px;white-space:nowrap}
+@keyframes mq{to{transform:translateX(-16.6667%)}}
+/* Magnético e menu ativo */
+.button,nav .nav-contact{translate:var(--tx,0) var(--ty,0)}
+.button{transition:transform .35s var(--ease),box-shadow .35s var(--ease),translate .25s ease-out}
+nav .nav-contact{transition:background-color .3s,color .3s,translate .25s ease-out}
+nav a.on:not(.nav-contact)::after{transform:scaleX(1)}
+@media(max-width:950px){.portrait{margin-top:32px;max-width:300px}.stats{gap:28px}}
+@media(max-width:650px){.competencies .flip{height:200px}.stats b{font-size:38px}.portrait{max-width:260px}}
+@media(prefers-reduced-motion:reduce){.flip-in,.chips li{transition:none!important}.hero::before{opacity:.7}.portrait{transform:none}.portrait.bld:not(.in) img{clip-path:none}.portrait.bld:not(.in) .c{opacity:1;transform:none}}
