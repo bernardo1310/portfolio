@@ -59,4 +59,4 @@ body.motion-paused .button,body.motion-paused .nav-contact{translate:none}
 
 /* Original layout, updated supplied logos. Keep transparent artwork intact. */
 .project-media.logo-light{background:#f3f4ef}
-.project-media.logo img[src$="compiler-logo.png"],.project-media.logo img[src$="quicksort-logo.png"],.project-media.logo img[src$="linux-logo.png"],.project-media.logo img[src$="eazy-logo.png"]{width:calc(100% - 24px);height:calc(100% - 24px);max-width:none;max-height:none;object-fit:contain}
+.project-media.logo img[src$="compiler-logo.png"],.project-media.logo img[src$="quicksort-logo.png"],.project-media.logo img[src$="linux-logo.png"],.project-media.logo img[src*="eazy-logo.png"]{width:calc(100% - 24px);height:calc(100% - 24px);max-width:none;max-height:none;object-fit:contain}
