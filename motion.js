@@ -6,6 +6,7 @@ const motionButton = document.querySelector('.motion-toggle');
 const portrait = document.querySelector('.portrait');
 let userPaused = false;
 const revealAnimations = new Set();
+const revealedElements = new WeakSet();
 const revealTargets = document.querySelectorAll('.section-head, .project, .about-grid > div, .experience, .competencies article, .contact .wrap');
 let revealObserver;
 const activeCounts = new Map();
@@ -43,15 +44,17 @@ function syncScrollMotion(paused) {
   if (paused || !('IntersectionObserver' in window) || !Element.prototype.animate) return;
   revealObserver = new IntersectionObserver((entries) => {
     entries.forEach((entry, index) => {
-      if (!entry.isIntersecting) return;
+      if (!entry.isIntersecting || revealedElements.has(entry.target)) return;
+      revealedElements.add(entry.target);
+      revealObserver.unobserve(entry.target);
       // Cancel an earlier entrance if this element quickly re-enters the viewport.
       for (const animation of revealAnimations) {
         if (animation.effect?.target === entry.target) { animation.cancel(); revealAnimations.delete(animation); }
       }
       const animation = entry.target.animate([
-        {opacity: 0.2, transform: 'translateY(42px) scale(.985)'},
+        {opacity: 0.2, transform: 'translateY(54px) scale(.975)'},
         {opacity: 1, transform: 'translateY(0) scale(1)'}
-      ], {duration: 780, delay: Math.min(index, 3) * 75, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards'});
+      ], {duration: 1000, delay: Math.min(index, 3) * 100, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards'});
       revealAnimations.add(animation);
       animation.onfinish = () => revealAnimations.delete(animation);
     });

@@ -38,3 +38,8 @@ Galeria com logos fornecidas pelo proprietário, QuickSort em Estruturas de dado
 
 Verificado em 320, 390, 768 e 1440 px, com e sem JavaScript, teclado, imagens e pausa/retomada. Nenhuma dependência externa no carregamento da página.
 
+
+## Revisão visual de 18/11/2026
+
+Paleta preto, cinza e verde-limão neon. Logos preservadas sem distorção ou ampliação excessiva; imagens de referência fornecidas substituem as capas geradas de investimentos e Linux. Quadros de mídia corrigidos para impedir corte por dimensões intrínsecas do PNG. Entradas de rolagem sem reinício na borda da tela, linhas animadas e moldura vinculada à rolagem. Preferência de movimento reduzido e pausa mantidas.
+
