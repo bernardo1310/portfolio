@@ -117,3 +117,40 @@ if ('IntersectionObserver' in window) {
   }, {rootMargin:'-15% 0px -65% 0px'});
   document.querySelectorAll('main section[id]').forEach(section => spy.observe(section));
 }
+
+// Keep the technology ticker; duplicate labels are hidden from assistive tech.
+const strip = document.querySelector('.skills-strip .wrap');
+if (strip) {
+  const labels = [...strip.children];
+  for (let i=0;i<2;i++) labels.forEach(label => {
+    const copy=label.cloneNode(true); copy.setAttribute('aria-hidden','true'); strip.append(copy);
+  });
+  strip.classList.add('ticker');
+}
+
+document.querySelectorAll('.button, .nav-contact, .project').forEach(element => {
+  element.addEventListener('pointermove', event => {
+    if (userPaused || motionPreference.matches || !finePointer.matches) return;
+    const box=element.getBoundingClientRect();
+    element.style.setProperty('--pointer-x', `${event.clientX-box.left}px`);
+    element.style.setProperty('--pointer-y', `${event.clientY-box.top}px`);
+    if (!element.classList.contains('project')) {
+      element.style.setProperty('--magnet-x', `${(event.clientX-box.left-box.width/2)*.08}px`);
+      element.style.setProperty('--magnet-y', `${(event.clientY-box.top-box.height/2)*.1}px`);
+    }
+  });
+  element.addEventListener('pointerleave', () => {
+    element.style.setProperty('--magnet-x','0px');element.style.setProperty('--magnet-y','0px');
+  });
+});
+
+// Preserve the subtle pointer light from the existing public version.
+let spotlightFrame = 0;
+if (typeof window.addEventListener === 'function') window.addEventListener('pointermove', event => {
+  if (userPaused || motionPreference.matches || !finePointer.matches || spotlightFrame) return;
+  spotlightFrame = requestAnimationFrame(() => {
+    document.documentElement.style.setProperty('--light-x', `${event.clientX}px`);
+    document.documentElement.style.setProperty('--light-y', `${event.clientY}px`);
+    spotlightFrame = 0;
+  });
+}, {passive:true});

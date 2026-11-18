@@ -56,3 +56,7 @@ body.motion-paused .button,body.motion-paused .nav-contact{translate:none}
 /* Keep intrinsic PNG dimensions from expanding a CSS grid media track. */
 .project-media{min-width:0;min-height:0}.project-media.art img{position:absolute;inset:0;min-height:0;min-width:0}.project-media.logo img{position:absolute;inset:0;margin:auto;width:calc(100% - 60px);height:calc(100% - 52px)}
 @media(max-width:700px){.project-media.logo img{width:calc(100% - 48px);height:calc(100% - 48px)}}
+
+/* Original layout, updated supplied logos. Keep transparent artwork intact. */
+.project-media.logo-light{background:#f3f4ef}
+.project-media.logo img[src$="compiler-logo.png"],.project-media.logo img[src$="quicksort-logo.png"],.project-media.logo img[src$="linux-logo.png"],.project-media.logo img[src$="eazy-logo.png"]{width:calc(100% - 24px);height:calc(100% - 24px);max-width:none;max-height:none;object-fit:contain}
