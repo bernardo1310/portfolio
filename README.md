@@ -31,3 +31,10 @@ Site pessoal estático com meus projetos, formação e experiência em tecnologi
 - E-mail: coelhobernardo199@gmail.com
 - LinkedIn: https://www.linkedin.com/in/bernardo-fran%C3%A7a-coelho-45230121b/
 - GitHub: https://github.com/bernardo1310
+
+## Atualização de 17/11/2026
+
+Galeria com logos fornecidas pelo proprietário, QuickSort em Estruturas de dados e capas ilustrativas para Eazy-Invest e Monitor Linux. Visual futurista com foto adicional no início; foto da seção Sobre, contadores, flashcards 3D, letreiro, efeitos e metadados anteriores preservados. Ícones SVG e animações de rolagem com pausa e preferência de movimento reduzido. Estilos atuais em future.css e interações em motion.js.
+
+Verificado em 320, 390, 768 e 1440 px, com e sem JavaScript, teclado, imagens e pausa/retomada. Nenhuma dependência externa no carregamento da página.
+

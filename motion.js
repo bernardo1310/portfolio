@@ -1,152 +1,153 @@
-(function () {
-  'use strict';
-  var d = document, root = d.documentElement;
-  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var fine = matchMedia('(pointer: fine)').matches;
-  var canHover = matchMedia('(hover: hover)').matches;
-  var hasIO = 'IntersectionObserver' in window;
-  var each = function (sel, fn) { Array.prototype.forEach.call(d.querySelectorAll(sel), fn); };
+'use strict';
+// Decorative only: content and navigation also work without JavaScript.
+const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+const motionButton = document.querySelector('.motion-toggle');
+const portrait = document.querySelector('.portrait');
+let userPaused = false;
+const revealAnimations = new Set();
+const revealTargets = document.querySelectorAll('.section-head, .project, .about-grid > div, .experience, .competencies article, .contact .wrap');
+let revealObserver;
+const activeCounts = new Map();
+let countObserver;
 
-  // Barra de progresso de leitura
-  var ticking = false;
-  function updateProgress() {
-    var max = root.scrollHeight - innerHeight;
-    root.style.setProperty('--p', max > 0 ? Math.min(scrollY / max, 1) : 0);
-    ticking = false;
+function syncCounters(paused) {
+  countObserver?.disconnect();
+  for (const [element, frame] of activeCounts) {
+    cancelAnimationFrame(frame);
+    element.textContent = element.dataset.count;
   }
-  addEventListener('scroll', function () {
-    if (!ticking) { ticking = true; requestAnimationFrame(updateProgress); }
-  }, { passive: true });
-  updateProgress();
-
-  // Menu destaca a seção atual
-  if (hasIO) {
-    var links = {};
-    each('nav a[href^="#"]', function (a) { links[a.getAttribute('href').slice(1)] = a; });
-    var spy = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) {
-        if (!e.isIntersecting) return;
-        Object.keys(links).forEach(function (k) { links[k].classList.toggle('on', k === e.target.id); });
-      });
-    }, { rootMargin: '-45% 0px -50% 0px' });
-    ['inicio', 'projetos', 'sobre', 'experiencia', 'contato'].forEach(function (id) {
-      var el = d.getElementById(id); if (el) spy.observe(el);
-    });
-  }
-
-  // Atraso escalonado dos chips (via CSSOM, permitido pela CSP)
-  each('.chips', function (ul) {
-    Array.prototype.forEach.call(ul.children, function (li, i) { li.style.setProperty('--i', i); });
-  });
-
-  // Flashcards: em telas sem hover, o toque vira o card
-  if (!canHover) {
-    each('.flip', function (c) {
-      c.addEventListener('click', function () { c.classList.toggle('flipped'); });
-    });
-  }
-
-  // Contadores
-  function count(el) {
-    var to = +el.getAttribute('data-count'), t0 = null;
-    el.textContent = '0';
-    (function step(t) {
-      if (t0 === null) t0 = t;
-      var p = Math.min((t - t0) / 1500, 1);
-      el.textContent = Math.round(to * (1 - Math.pow(1 - p, 3)));
-      if (p < 1) requestAnimationFrame(step);
-    })(performance.now());
-  }
-
-  if (reduce) return;
-
-  // Spotlight global do cursor
-  if (fine) {
-    root.classList.add('fx');
-    var raf = 0, mx = 0, my = 0;
-    addEventListener('pointermove', function (e) {
-      mx = e.clientX; my = e.clientY;
-      if (!raf) raf = requestAnimationFrame(function () {
-        root.style.setProperty('--mx', mx + 'px');
-        root.style.setProperty('--my', my + 'px');
-        raf = 0;
-      });
-    }, { passive: true });
-
-    // Foco de luz dentro dos cards de projeto
-    each('.project', function (el) {
-      el.addEventListener('pointermove', function (e) {
-        var r = el.getBoundingClientRect();
-        el.style.setProperty('--cx', (e.clientX - r.left) + 'px');
-        el.style.setProperty('--cy', (e.clientY - r.top) + 'px');
-      });
-    });
-
-    // Botões magnéticos
-    each('.button, .nav-contact', function (el) {
-      el.addEventListener('pointermove', function (e) {
-        var r = el.getBoundingClientRect();
-        el.style.setProperty('--tx', (e.clientX - r.left - r.width / 2) * 0.18 + 'px');
-        el.style.setProperty('--ty', (e.clientY - r.top - r.height / 2) * 0.28 + 'px');
-      });
-      el.addEventListener('pointerleave', function () {
-        el.style.setProperty('--tx', '0px');
-        el.style.setProperty('--ty', '0px');
-      });
-    });
-
-    // Inclinação 3D do retrato
-    var pt = d.querySelector('.portrait');
-    if (pt) {
-      pt.addEventListener('pointermove', function (e) {
-        var r = pt.getBoundingClientRect();
-        var x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
-        pt.style.setProperty('--rx', (-y * 9) + 'deg');
-        pt.style.setProperty('--ry', (x * 11) + 'deg');
-      });
-      pt.addEventListener('pointerleave', function () {
-        pt.style.setProperty('--rx', '0deg');
-        pt.style.setProperty('--ry', '0deg');
-      });
+  activeCounts.clear();
+  if (paused || !('IntersectionObserver' in window)) return;
+  countObserver = new IntersectionObserver(entries => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      countObserver.unobserve(entry.target);
+      const start = performance.now(), target = Number(entry.target.dataset.count);
+      function step(now) {
+        const progress = Math.min((now - start) / 1100, 1);
+        entry.target.textContent = String(Math.round(target * (1 - (1 - progress) ** 3)));
+        if (progress < 1) activeCounts.set(entry.target, requestAnimationFrame(step));
+        else activeCounts.delete(entry.target);
+      }
+      activeCounts.set(entry.target, requestAnimationFrame(step));
     }
-  }
+  }, {threshold: .5});
+  document.querySelectorAll('[data-count]').forEach(el => countObserver.observe(el));
+}
 
-  // Letreiro das tecnologias (conteúdo repetido, cópias ocultas para leitores de tela)
-  var strip = d.querySelector('.skills-strip .wrap');
-  if (strip) {
-    var base = Array.prototype.slice.call(strip.children);
-    for (var n = 0; n < 5; n++) {
-      base.forEach(function (k) {
-        var c = k.cloneNode(true); c.setAttribute('aria-hidden', 'true'); strip.appendChild(c);
-      });
-    }
-    root.classList.add('mq');
-  }
-
-  if (!hasIO) return;
-
-  // Revelar ao rolar
-  var io = new IntersectionObserver(function (entries) {
-    entries.forEach(function (entry) {
+function syncScrollMotion(paused) {
+  revealObserver?.disconnect();
+  for (const animation of revealAnimations) animation.cancel();
+  revealAnimations.clear();
+  if (paused || !('IntersectionObserver' in window) || !Element.prototype.animate) return;
+  revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry, index) => {
       if (!entry.isIntersecting) return;
-      var el = entry.target;
-      el.classList.add('in');
-      if (el.classList.contains('stats')) each('.stats b', count);
-      io.unobserve(el);
+      // Cancel an earlier entrance if this element quickly re-enters the viewport.
+      for (const animation of revealAnimations) {
+        if (animation.effect?.target === entry.target) { animation.cancel(); revealAnimations.delete(animation); }
+      }
+      const animation = entry.target.animate([
+        {opacity: 0.2, transform: 'translateY(42px) scale(.985)'},
+        {opacity: 1, transform: 'translateY(0) scale(1)'}
+      ], {duration: 780, delay: Math.min(index, 3) * 75, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards'});
+      revealAnimations.add(animation);
+      animation.onfinish = () => revealAnimations.delete(animation);
     });
-  }, { threshold: 0.1, rootMargin: '0px' });
+  }, {threshold: 0.08, rootMargin: '0px 0px -24px 0px'});
+  revealTargets.forEach(target => revealObserver.observe(target));
+}
+function updateMotion() {
+  const paused = userPaused || motionPreference.matches;
+  document.body.classList.toggle('motion-paused', paused);
+  motionButton.hidden = motionPreference.matches;
+  motionButton.setAttribute('aria-pressed', String(paused));
+  motionButton.replaceChildren();
+  const symbol = document.createElement('span');
+  symbol.setAttribute('aria-hidden', 'true');
+  symbol.className = paused ? 'control-icon play-icon' : 'control-icon pause-icon';
+  motionButton.append(symbol, paused ? 'Ativar movimentos' : 'Pausar movimentos');
+  if (paused) delete portrait.dataset.tilt;
+  syncScrollMotion(paused);
+  syncCounters(paused);
+}
+motionButton.addEventListener('click', () => { userPaused = !userPaused; updateMotion(); });
+motionPreference.addEventListener('change', updateMotion);
+portrait.addEventListener('pointermove', (event) => {
+  if (motionPreference.matches || userPaused || !finePointer.matches) return;
+  const bounds = portrait.getBoundingClientRect();
+  portrait.dataset.tilt = event.clientX < bounds.left + bounds.width / 2 ? 'left' : 'right';
+});
+portrait.addEventListener('pointerleave', () => { delete portrait.dataset.tilt; });
+updateMotion();
 
-  [
-    '.section-head', '.project', '.about-grid > div', '.education',
-    '.experience > *', '.competencies article', '.contact .wrap > *', 'footer > *'
-  ].forEach(function (selector) {
-    each(selector, function (el) {
-      var index = Array.prototype.indexOf.call(el.parentElement.children, el);
-      el.style.setProperty('--d', Math.min(index, 6) * 0.08 + 's');
-      el.classList.add('rv');
-      io.observe(el);
-    });
+// Retain interactive technology cards, with real keyboard/touch buttons.
+document.querySelectorAll('.flip').forEach((card, index) => {
+  const button = card.querySelector('.flip-toggle');
+  const back = card.querySelector('.back');
+  back.id = `technologies-${index}`;
+  button.setAttribute('aria-controls', back.id);
+  button.hidden = false;
+  back.setAttribute('aria-hidden', 'true');
+  card.classList.add('interactive-flip');
+  button.addEventListener('click', () => {
+    const open = card.classList.toggle('flipped');
+    button.setAttribute('aria-expanded', String(open));
+    back.setAttribute('aria-hidden', String(!open));
+    button.textContent = open ? 'Voltar' : 'Ver tecnologias';
   });
-  each('.portrait', function (el) { el.classList.add('bld'); io.observe(el); });
-  each('.stats', function (el) { io.observe(el); });
-})();
+});
+
+// Active section indicator is independent of motion preference.
+if ('IntersectionObserver' in window) {
+  const navigation = [...document.querySelectorAll('nav a[href^="#"]')];
+  const spy = new IntersectionObserver(entries => {
+    for (const entry of entries) if (entry.isIntersecting) {
+      navigation.forEach(link => {
+        const current = link.hash === `#${entry.target.id}`;
+        link.classList.toggle('on', current);
+        if (current) link.setAttribute('aria-current', 'location');
+        else link.removeAttribute('aria-current');
+      });
+    }
+  }, {rootMargin:'-15% 0px -65% 0px'});
+  document.querySelectorAll('main section[id]').forEach(section => spy.observe(section));
+}
+
+// Keep the technology ticker; duplicate labels are hidden from assistive tech.
+const strip = document.querySelector('.skills-strip .wrap');
+if (strip) {
+  const labels = [...strip.children];
+  for (let i=0;i<2;i++) labels.forEach(label => {
+    const copy=label.cloneNode(true); copy.setAttribute('aria-hidden','true'); strip.append(copy);
+  });
+  strip.classList.add('ticker');
+}
+
+document.querySelectorAll('.button, .nav-contact, .project').forEach(element => {
+  element.addEventListener('pointermove', event => {
+    if (userPaused || motionPreference.matches || !finePointer.matches) return;
+    const box=element.getBoundingClientRect();
+    element.style.setProperty('--pointer-x', `${event.clientX-box.left}px`);
+    element.style.setProperty('--pointer-y', `${event.clientY-box.top}px`);
+    if (!element.classList.contains('project')) {
+      element.style.setProperty('--magnet-x', `${(event.clientX-box.left-box.width/2)*.08}px`);
+      element.style.setProperty('--magnet-y', `${(event.clientY-box.top-box.height/2)*.1}px`);
+    }
+  });
+  element.addEventListener('pointerleave', () => {
+    element.style.setProperty('--magnet-x','0px');element.style.setProperty('--magnet-y','0px');
+  });
+});
+
+// Preserve the subtle pointer light from the existing public version.
+let spotlightFrame = 0;
+if (typeof window.addEventListener === 'function') window.addEventListener('pointermove', event => {
+  if (userPaused || motionPreference.matches || !finePointer.matches || spotlightFrame) return;
+  spotlightFrame = requestAnimationFrame(() => {
+    document.documentElement.style.setProperty('--light-x', `${event.clientX}px`);
+    document.documentElement.style.setProperty('--light-y', `${event.clientY}px`);
+    spotlightFrame = 0;
+  });
+}, {passive:true});
